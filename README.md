@@ -1,3 +1,12 @@
+---
+title: Resume Optimizer
+emoji: 🚀
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+pinned: false
+---
+
 # ATS Beater
 
 Open-source AI-powered resume tailoring service. Upload your PDF resume, paste a job description, and get an ATS-optimized tailored resume compiled to PDF.
