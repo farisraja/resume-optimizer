@@ -40,17 +40,16 @@ def upgrade() -> None:
         sa.UniqueConstraint("domain"),
     )
 
-    op.add_column("users", sa.Column("is_super_admin", sa.Boolean(), server_default="false", nullable=False))
-    op.add_column(
-        "users",
-        sa.Column("tenant_id", sa.String(), sa.ForeignKey("tenants.id", ondelete="SET NULL"), nullable=True),
-    )
-    op.create_index("ix_users_tenant_id", "users", ["tenant_id"])
+    with op.batch_alter_table("users", schema=None) as batch_op:
+        batch_op.add_column(sa.Column("is_super_admin", sa.Boolean(), server_default="false", nullable=False))
+        batch_op.add_column(sa.Column("tenant_id", sa.String(), sa.ForeignKey("tenants.id", ondelete="SET NULL", name="fk_users_tenant_id"), nullable=True))
+        batch_op.create_index("ix_users_tenant_id", ["tenant_id"])
 
 
 def downgrade() -> None:
-    op.drop_index("ix_users_tenant_id", table_name="users")
-    op.drop_column("users", "tenant_id")
-    op.drop_column("users", "is_super_admin")
+    with op.batch_alter_table("users", schema=None) as batch_op:
+        batch_op.drop_index("ix_users_tenant_id")
+        batch_op.drop_column("tenant_id")
+        batch_op.drop_column("is_super_admin")
     op.drop_table("tenant_domain_rules")
     op.drop_table("tenants")
