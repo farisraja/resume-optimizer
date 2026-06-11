@@ -147,8 +147,8 @@ def create_app() -> FastAPI:
         
         response = await call_next(request)
         
-        # Prevent caching for HTML files so CSS updates show immediately
-        if request.url.path == "/" or request.url.path.endswith(".html"):
+        # Prevent caching for HTML files and auth endpoints
+        if request.url.path == "/" or request.url.path.endswith(".html") or request.url.path.startswith("/auth/"):
             response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
             response.headers["Pragma"] = "no-cache"
             response.headers["Expires"] = "0"
