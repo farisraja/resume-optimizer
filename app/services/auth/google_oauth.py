@@ -1,5 +1,5 @@
 def get_login_url(redirect_uri: str) -> str:
-    return "http://localhost:8000/auth/google/callback?code=mock_code"
+    return f"{redirect_uri}?code=mock_code"
 
 async def exchange_code(code: str, redirect_uri: str) -> dict:
     return {"access_token": "mock_token"}
