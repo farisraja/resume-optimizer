@@ -35,6 +35,6 @@ RUN chmod +x /entrypoint.sh
 ENV LATEX_BIN_PATH=/usr/bin \
     PYTHONUNBUFFERED=1
 
-EXPOSE 8080
+EXPOSE 7860
 
 ENTRYPOINT ["/entrypoint.sh"]

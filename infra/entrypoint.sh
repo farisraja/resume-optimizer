@@ -7,4 +7,4 @@ if [ "$RUN_MIGRATIONS" = "true" ]; then
     uv run alembic upgrade head
 fi
 
-exec uv run uvicorn app.main:app --host 0.0.0.0 --port "${PORT:-8080}" --proxy-headers --forwarded-allow-ips='*'
+exec uv run uvicorn app.main:app --host 0.0.0.0 --port "${PORT:-7860}" --proxy-headers --forwarded-allow-ips='*'
