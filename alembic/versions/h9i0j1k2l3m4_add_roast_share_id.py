@@ -32,7 +32,8 @@ def upgrade() -> None:
         )
 
     # Now make it non-nullable and add unique index
-    op.alter_column("roasts", "share_id", nullable=False)
+    with op.batch_alter_table("roasts", schema=None) as batch_op:
+        batch_op.alter_column("share_id", nullable=False)
     op.create_index("ix_roasts_share_id", "roasts", ["share_id"], unique=True)
 
 
