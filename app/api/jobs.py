@@ -250,3 +250,47 @@ async def download_pdf(
             )
         },
     )
+
+
+@router.get("/{job_id}/preview")
+async def preview_pdf(
+    job_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Returns a stitched JPEG image of the PDF to avoid iframe blocking in strict browsers."""
+    pdf_bytes = await service.get_pdf(db, job_id, current_user.id)
+    
+    import asyncio
+    import io
+    from pdf2image import convert_from_bytes
+    from PIL import Image
+
+    def _create_preview():
+        pages = convert_from_bytes(pdf_bytes, dpi=150)
+        if not pages:
+            raise ValueError("No pages found in PDF")
+        
+        if len(pages) == 1:
+            buf = io.BytesIO()
+            pages[0].save(buf, format="JPEG", quality=85)
+            return buf.getvalue()
+
+        # Stitch vertically for multi-page resumes
+        widths, heights = zip(*(i.size for i in pages))
+        max_width = max(widths)
+        total_height = sum(heights) + (len(pages) - 1) * 20 # 20px padding
+        
+        new_im = Image.new('RGB', (max_width, total_height), color=(243, 244, 246)) # light gray gap
+        y_offset = 0
+        for im in pages:
+            x_offset = (max_width - im.size[0]) // 2
+            new_im.paste(im, (x_offset, y_offset))
+            y_offset += im.size[1] + 20
+            
+        buf = io.BytesIO()
+        new_im.save(buf, format="JPEG", quality=85)
+        return buf.getvalue()
+
+    img_bytes = await asyncio.to_thread(_create_preview)
+    return Response(content=img_bytes, media_type="image/jpeg")

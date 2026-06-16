@@ -2969,7 +2969,7 @@ const JobDetailPage = {
               <button @click="loadPdf" class="btn-secondary text-xs">RETRY</button>
             </div>
           </div>
-          <iframe v-else-if="pdfUrl" :src="pdfUrl" class="pdf-embed"></iframe>
+          <img v-else-if="pdfUrl" :src="pdfUrl" class="w-full h-auto max-w-full" style="box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);" />
           <div v-if="pdfRecompiling" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(15,27,46,0.7);border-radius:8px;z-index:5;">
             <div class="text-center">
               <div class="spinner mx-auto mb-2" style="width:24px;height:24px;border-width:2px;"></div>
@@ -3128,8 +3128,9 @@ const JobDetailPage = {
         if (!token) throw new Error("No authentication token found");
         
         // Instead of fetching a Blob, use the direct URL with the access token
-        // This prevents Microsoft Edge and other browsers from blocking Blob URLs in cross-origin sandboxed iframes.
-        pdfUrl.value = `/jobs/${jobId.value}/pdf?inline=true&access_token=${token}`;
+        // We use the /preview endpoint (which returns a JPEG) because Chrome and Edge 
+        // aggressively block native PDF viewers inside cross-origin sandboxed iframes.
+        pdfUrl.value = `/jobs/${jobId.value}/preview?access_token=${token}`;
       } catch (e) {
         pdfError.value = 'Failed to load PDF viewer: ' + e.message;
       } finally {
