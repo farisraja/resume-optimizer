@@ -47,8 +47,11 @@ async def _get_or_create_dev_user(db: AsyncSession) -> User:
     return user
 
 
+from fastapi import Depends, Header, Query
+
 async def get_current_user(
     authorization: Optional[str] = Header(default=None),
+    access_token: Optional[str] = Query(default=None),
     db: AsyncSession = Depends(get_db),
 ) -> User:
     settings = get_settings()
@@ -58,9 +61,13 @@ async def get_current_user(
             raise RuntimeError("DEV_AUTH_BYPASS cannot be enabled outside DEV environment")
         return await _get_or_create_dev_user(db)
 
-    if not authorization or not authorization.startswith("Bearer "):
+    if authorization and authorization.startswith("Bearer "):
+        token = authorization[7:]
+    elif access_token:
+        token = access_token
+    else:
         raise AuthenticationError("Invalid authorization header")
-    token = authorization[7:]
+    
     payload = verify_token(token)
     user = await db.get(User, payload["sub"])
     if not user:

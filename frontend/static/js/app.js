@@ -3119,20 +3119,19 @@ const JobDetailPage = {
     });
 
     // -- PDF blob loading --
+    // -- PDF loading --
     const loadPdf = async () => {
-      if (pdfUrl.value) { URL.revokeObjectURL(pdfUrl.value); pdfUrl.value = null; }
-      pdfLoading.value = true;
       pdfError.value = null;
+      pdfLoading.value = true;
       try {
         const token = localStorage.getItem('token');
-        const headers = {};
-        if (token) headers['Authorization'] = `Bearer ${token}`;
-        const res = await fetch(`/jobs/${jobId.value}/pdf?inline=true`, { headers });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const blob = await res.blob();
-        pdfUrl.value = URL.createObjectURL(blob);
+        if (!token) throw new Error("No authentication token found");
+        
+        // Instead of fetching a Blob, use the direct URL with the access token
+        // This prevents Microsoft Edge and other browsers from blocking Blob URLs in cross-origin sandboxed iframes.
+        pdfUrl.value = `/jobs/${jobId.value}/pdf?inline=true&access_token=${token}`;
       } catch (e) {
-        pdfError.value = e.message || 'Failed to load PDF';
+        pdfError.value = 'Failed to load PDF viewer: ' + e.message;
       } finally {
         pdfLoading.value = false;
       }
